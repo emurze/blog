@@ -1,5 +1,8 @@
+from typing import cast
+
 from django.contrib.auth.models import User
 from django.db import models
+from django.urls import reverse
 from django.utils import timezone
 
 
@@ -14,7 +17,7 @@ class Post(models.Model):
         PUBLISHED = ('PB', 'Published')
 
     title = models.CharField(max_length=250)
-    slug = models.SlugField(max_length=250)
+    slug = models.SlugField(max_length=250, unique_for_date='publish')
     content = models.TextField()
     publish = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(auto_now=True)
@@ -32,6 +35,11 @@ class Post(models.Model):
         indexes = [
             models.Index(fields=['-publish'])
         ]
+
+    def get_absolute_url(self):
+        pb = cast(timezone, self.publish)
+        return reverse('blog:post_detail',
+                       args=[pb.year, pb.month, pb.day, self.slug])
 
     def __str__(self) -> str:
         return f"{self.title}"
