@@ -90,3 +90,5 @@ input[type=submit] {
     font-size:12px;
     color:#666;
 }
+.only-one-color, .only-one-color:visited {color: #00abff;}
+.only-one-color:active, .only-one-color:hover {color: #00abff;}
