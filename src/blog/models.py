@@ -1,9 +1,12 @@
+import datetime
 from typing import cast
 
 from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
+from lorem import get_word
+from taggit.managers import TaggableManager
 
 
 class PublishedManager(models.Manager):
@@ -18,17 +21,18 @@ class Post(models.Model):
 
     title = models.CharField(max_length=250)
     slug = models.SlugField(max_length=250, unique_for_date='publish')
-    content = models.TextField()
+    content = models.TextField(default=get_word(count=100).capitalize())
     publish = models.DateTimeField(default=timezone.now)
     updated = models.DateTimeField(auto_now=True)
     created = models.DateTimeField(auto_now_add=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE,
                                related_name='blog_post')
     status = models.CharField(max_length=2, choices=Status.choices,
-                              default=Status.DRAFT)
+                              default=Status.PUBLISHED)
 
     objects = models.Manager()
     published = PublishedManager()
+    tags = TaggableManager()
 
     class Meta:
         ordering = ["-publish"]
@@ -37,7 +41,7 @@ class Post(models.Model):
         ]
 
     def get_absolute_url(self):
-        pb = cast(timezone, self.publish)
+        pb = cast(datetime, self.publish)
         return reverse('blog:post_detail',
                        args=[pb.year, pb.month, pb.day, self.slug])
 
